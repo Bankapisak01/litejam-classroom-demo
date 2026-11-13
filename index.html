@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Litejam Classroom Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+:root{--bg:#141118;--card:#1f1b26;--line:rgba(255,255,255,.1);--fg:#fff;--mut:rgba(255,255,255,.62);--lime:#ADFE00;--blue:#50BCFF}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:'Noto Sans Thai',system-ui,sans-serif}
+.w{max-width:980px;margin:0 auto;padding:28px 16px 40px}h1{margin:0;font-size:26px;font-weight:900}h1 span{color:var(--lime)}
+.sub{color:var(--mut);font-size:14px;margin-top:6px;line-height:1.5}
+.room{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:22px 0 18px;padding:14px 16px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.room b{font-size:13px;color:var(--mut)}.code{font:900 30px/1 ui-monospace,Menlo,monospace;letter-spacing:6px;color:var(--lime)}
+input{font:900 18px ui-monospace,Menlo,monospace;letter-spacing:3px;width:130px;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:#100d16;color:#fff;text-transform:uppercase}
+button,.btn{font:700 14px 'Noto Sans Thai',sans-serif;padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:#2b2731;color:#fff;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.pri{background:var(--lime);color:#141118;border-color:var(--lime)}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:720px){.g{grid-template-columns:1fr}}
+.card{padding:18px;border-radius:16px;background:var(--card);border:1px solid var(--line)}.card h2{margin:0 0 4px;font-size:18px}
+.seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}
+.seat{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;border:1px solid var(--line);background:#16121f}
+.seat canvas,.seat img{width:64px;height:64px;border-radius:6px;background:#fff;image-rendering:pixelated;flex:none}
+.seat a{color:var(--blue);font-weight:700;font-size:13px;text-decoration:none}.seat small{display:block;color:var(--mut);font-size:11px}
+ol{margin:8px 0 0;padding-left:20px;color:var(--mut);font-size:13.5px;line-height:1.7}code{color:var(--lime)}
+.note{margin-top:18px;font-size:12px;color:var(--mut);line-height:1.6}
+</style></head><body><div class="w">
+<h1>Litejam <span>Classroom</span> Demo</h1>
+<div class="sub">เครื่องครู (Web) ↔ จอกีตาร์นักเรียน (Student EQ 320×240) · เปิดคนละเครื่องได้ ขอแค่ใช้ <b>รหัสห้อง</b> เดียวกัน</div>
+<div class="room"><b>รหัสห้อง</b><span class="code" id="code"></span><input id="inp" maxlength="8" placeholder="ABCD"><button id="set">ใช้รหัสนี้</button><button id="new">สุ่มรหัสใหม่</button></div>
+<div class="g">
+ <div class="card"><h2>👩‍🏫 เครื่องครู</h2><div class="sub">เปิดบนโน้ตบุ๊ก / จอโปรเจกเตอร์ · เลือกห้องเรียน แล้วเลือกบทเรียน / Litejam Tools</div>
+  <p><a class="btn pri" id="teacher" target="_blank">เปิดเครื่องครู ↗</a></p>
+  <ol><li>เปิดเครื่องครู → เลือกห้อง <b>ม.2/3 · Guitar 101</b></li><li>เครื่องนักเรียน: Wi-Fi → <code>LJ-Teacher-Room2</code> รหัส <code>guitar101</code> → แตะ <b>ห้องเรียน</b></li><li>ครูกด Start Practice / Challenge / Quiz → จอนักเรียนเปลี่ยนตาม</li></ol></div>
+ <div class="card"><h2>🎸 เครื่องนักเรียน</h2><div class="sub">สแกน QR ด้วยมือถือ / แท็บเล็ต — 1 เครื่อง = กีตาร์ 1 ตัว (ที่นั่ง 01–05)</div>
+  <div class="seats" id="seats"></div>
+  <p><a class="btn" id="multi" target="_blank">จอนักเรียน 5 จอในหน้าเดียว ↗</a></p></div>
+</div>
+<div class="note">เดโมนี้ใช้ข้อมูลตัวอย่างเท่านั้น · ข้อความระหว่างครูกับนักเรียนส่งผ่าน public MQTT broker (HiveMQ / EMQX) ตามรหัสห้อง — ใครรู้รหัสห้องก็เข้าห้องเดียวกันได้ · การตรวจโน้ตเป็นแบบจำลอง (แตะ/กด Space ที่สายกีตาร์บนจอ)</div>
+</div>
+<script>
+const SEATS=[['LJG-24-0801','01 · ธนกร'],['LJG-24-0802','02 · พิมพ์ชนก'],['LJG-24-0803','03 · กิตติภพ'],['LJG-24-0804','04 · Mia'],['LJG-24-0805','05 · ศุภกร']];
+const AL='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',rnd=()=>Array.from({length:4},()=>AL[Math.floor(Math.random()*AL.length)]).join('');
+const clean=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+let room=clean(new URLSearchParams(location.search).get('room'));try{room=room||clean(localStorage.getItem('lj-demo-room'))}catch(e){}room=room||rnd();
+const base=location.href.split('?')[0].split('#')[0].replace(/index\.html$/,'');
+function qr(url){try{const q=qrcode(0,'M');q.addData(url);q.make();return q.createDataURL(3,2)}catch(e){return''}}
+function draw(){try{localStorage.setItem('lj-demo-room',room)}catch(e){}history.replaceState(null,'','?room='+room);
+ document.getElementById('code').textContent=room;document.getElementById('inp').value=room;
+ document.getElementById('teacher').href=base+'teacher.html?room='+room;document.getElementById('multi').href=base+'student.html?room='+room;
+ document.getElementById('seats').innerHTML=SEATS.map(([s,n])=>{const u=base+'student.html?serial='+s+'&room='+room;return '<div class="seat"><img alt="QR '+n+'" src="'+qr(u)+'"><div><a href="'+u+'" target="_blank">ที่นั่ง '+n+' ↗</a><small>'+s+'</small></div></div>'}).join('');}
+document.getElementById('set').onclick=()=>{const v=clean(document.getElementById('inp').value);if(v){room=v;draw()}};
+document.getElementById('new').onclick=()=>{room=rnd();draw()};draw();
+</script></body></html>
