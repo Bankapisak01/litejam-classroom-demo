@@ -27,9 +27,9 @@
   }
   window.BroadcastChannel = RelayChannel;
   /* status badge */
-  let badge = null; const paint = () => { if (!badge && document.body) { badge = document.createElement('div'); badge.id = 'lj-relay'; badge.style.cssText = 'position:fixed;right:8px;bottom:8px;z-index:99999;font:700 11px/1 system-ui,sans-serif;padding:6px 9px;border-radius:99px;background:rgba(20,17,24,.88);color:#fff;border:1px solid rgba(255,255,255,.2);pointer-events:none'; document.body.appendChild(badge); }
+  let badge = null; const paint = () => { if (badge && !badge.isConnected && document.body) document.body.appendChild(badge); if (!badge && document.body) { badge = document.createElement('div'); badge.id = 'lj-relay'; badge.style.cssText = 'position:fixed;right:8px;bottom:8px;z-index:99999;font:700 11px/1 system-ui,sans-serif;padding:6px 9px;border-radius:99px;background:rgba(20,17,24,.88);color:#fff;border:1px solid rgba(255,255,255,.2);pointer-events:none'; document.body.appendChild(badge); }
     if (badge) badge.innerHTML = '<span style="color:' + (up ? '#ADFE00' : '#FFCC00') + '">●</span> ห้อง ' + room + (up ? ' · online' : ' · กำลังเชื่อมต่อ…'); };
-  if (window.top === window.self) { document.addEventListener('DOMContentLoaded', paint); }
+  if (window.top === window.self) { document.addEventListener('DOMContentLoaded', paint); setInterval(paint, 2000); }
   function connect() {
     if (!window.mqtt) { setTimeout(connect, 300); return; }
     client = window.mqtt.connect(BROKERS[bi % BROKERS.length], { clientId: 'lj-' + me, clean: true, reconnectPeriod: 2000, connectTimeout: 8000 });
